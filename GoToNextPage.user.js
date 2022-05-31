@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         GoToNextPage
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      0.5
-// @description  A shortcut (ctrl+alt+n) for clicking the next-button of pagination. google.com and amazon.com are tested.
+// @version      0.6
+// @description  A shortcut (ctrl+alt+n) to next-button of pagination. google.com and amazon.com are tested.
 // @author       fujifruity
 // @match        *://*/*
 // @grant        none
@@ -22,10 +22,12 @@
         if (event.key != 'n' || !event.altKey || !event.ctrlKey) return
 
         const queries = [
+            '[role*="navigation"]',
+            '[role*="pagination"]',
+            '[role*="pagenation"]',
+            '[class*="navigation"]',
             '[class*="pagination"]',
-            '[class*="Pagination"]',
             '[class*="pagenation"]',
-            '[class*="Pagenation"]',
             '[class*="pager"]'].join(',')
         const paginations = [...document.querySelectorAll(queries)]
         console.log('paginations', paginations)
