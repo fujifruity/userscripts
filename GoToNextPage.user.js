@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GoToNextPage
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      0.4
+// @version      0.5
 // @description  A shortcut (ctrl+alt+n) for clicking the next-button of pagination. google.com and amazon.com are tested.
 // @author       fujifruity
 // @match        *://*/*
@@ -35,8 +35,8 @@
             return descendants.reverse().find(e =>
                 // is visible
                 e.offsetParent != null
-                // and has any keyword somewhere
-                && keywords.some(keyword => e.outerHTML?.includes(keyword))
+                // and has any keyword
+                && keywords.some(keyword => e.innerText?.includes(keyword))
             )
         }).filter(e => e) // filter undefined
         console.log('nextButtons', nextButtons)
