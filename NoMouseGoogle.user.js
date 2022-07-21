@@ -1,17 +1,18 @@
 // ==UserScript==
 // @name         NoMouseGoogle
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      1.10
-// @description  Shortcut for Google search results. j/k to move focus, l/h to open in new/background tab.
+// @version      1.11
+// @description  Shortcut for Google search results. j/k to move focus, l/h to open in new/background tab, n/p to go to next/previous page.
 // @author       fujifruity
 // @include      https://www.google.com/search*
+// @include      https://www.google.co.*/search*
 // @grant        GM.openInTab
 // @license      MIT
 // ==/UserScript==
 
 {
-    const items = [...document.querySelectorAll('#rso div[data-hveid][data-ved]')]
-            .filter(e => e.offsetParent != null /* is visible */)
+    const items = [...document.querySelectorAll('#rso div[data-hveid][data-ved][lang], #rso video-voyager>div')]
+        .filter(e => e.offsetParent != null /* is visible */)
     const open = inBackground => {
         const url = findCurrentItem().querySelector('a').href
         GM.openInTab(url, inBackground)
@@ -23,13 +24,13 @@
         const currentItem = findCurrentItem()
         const r = currentItem.getBoundingClientRect();
         const inScreen = (0 < r.top && r.top < window.innerHeight
-                         || 0 < r.bottom && r.bottom < window.innerHeight)
+            || 0 < r.bottom && r.bottom < window.innerHeight)
         if (!inScreen) {
             const dist = e => {
                 const r = e.getBoundingClientRect()
                 return Math.abs(window.innerHeight - (r.top + r.bottom))
             }
-            const nearestItem = items.reduce((acc,e) => dist(acc) < dist(e) ? acc : e )
+            const nearestItem = items.reduce((acc, e) => dist(acc) < dist(e) ? acc : e)
             select(nearestItem)
             return
         }
@@ -63,6 +64,8 @@
         if (event.key == 'k') moveCursor(-1)
         if (event.key == 'l') open(false)
         if (event.key == 'h') open(true)
+        if (event.key == 'n') document.querySelector('#pnnext')?.click()
+        if (event.key == 'p') document.querySelector('#pnprev')?.click()
     })
 
 }
