@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SimpleShortcuts
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      2.0
+// @version      2.1
 // @description  Lets you create single-key shortcuts to click buttons. Press ctrl+alt+s to open manager.
 // @author       fujifruity
 // @match        *://*/*
@@ -15,11 +15,6 @@
 
 (async () => {
     'use strict';
-
-    //// delete all
-    //urls.forEach(url=>{
-    //    GM.deleteValue(url)
-    //})
 
     const getShortcuts = async url => {
         const shortcuts = await GM.getValue(url) ?? '{}'
@@ -44,14 +39,19 @@
         })
     }
     // Find the longest matching url from GM cache
-    const getDefaultUrl = async () => {
+    let defaultUrl; {
         const urls = await GM.listValues()
+        // // delete all
+        // urls.forEach(url=>{
+        //     console.log('delete url', url)
+        //     GM.deleteValue(url)
+        // })
         console.log('urls', urls)
         const foundUrl = urls.sort((a, b) => b.length - a.length).find(url => location.href.startsWith(url))
-        return foundUrl ?? location.protocol + '//' + location.host + location.pathname
+        defaultUrl = foundUrl ?? location.protocol + '//' + location.host + location.pathname
     }
     // Set shortcuts if exist
-    setShortcuts(await getDefaultUrl())
+    setShortcuts(defaultUrl)
 
     const modalId = 'fujifruity-simpleshortcuts'
     const createModal = async () => {
@@ -59,16 +59,23 @@
             <div id=${modalId} style="z-index:99999; width:auto; max-height:90%; position:fixed;
                 padding:1em; margin:1em; border-radius: 8px; overflow-y:auto; cursor:pointer;
                 box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; background-color:white" >
+                <h1><b>SimpleShortcuts</b></h1><br>
                 <label for=urlInput>URL</label><br>
                 <input id=urlInput size=32><br><br>
-                <input id=keyInput size=3 placeholder=key maxlength=1>
+                <input id=keyInput size=3 placeholder=key maxlength=20>
                 <input id=valueInput size=16 placeholder="CSS selector">
                 <input id=saveButton type=button value=Save>
                 <div id=shortcutList></div>
             </div> `
         document.body.innerHTML = modal + document.body.innerHTML
         // Init url input
-        elem('#urlInput').value = await getDefaultUrl()
+        elem('#urlInput').value = defaultUrl
+        // Init key input
+        const keyInput = elem('#keyInput')
+        keyInput.addEventListener('keyup', event => {
+            keyInput.value = event.key
+            keyInput.size = event.key.length
+        })
         // Init shortcut list
         const updateShortcutList = async () => {
             const shortcuts = await getShortcuts(elem('#urlInput').value)
@@ -100,10 +107,11 @@
         // Show modal
         const modal = elem('#' + modalId) ?? await createModal()
         modal.style.display = 'block'
+        modal.focus()
         // Set event listeners to close modal
         const closeModal = modal => { modal.style.display = 'none' }
         const onKeydown = event => {
-            if (event.key != 'Escape') return
+            if (event.target.tagName == "INPUT" || event.key != 'Escape') return
             closeModal(modal)
             window.removeEventListener('keydown', onKeydown)
         }
