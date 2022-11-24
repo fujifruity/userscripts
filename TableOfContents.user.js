@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         TableOfContents
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      1.3
-// @description  Create a table of contents for the page. ctrl+alt+t to show; click an item to jump; escape or click outside to close.
+// @version      1.4
+// @description  Create a table of contents for the page. ctrl+alt(command)+t to show; click an item to jump; escape or click outside to close.
 // @author       fujifruity
 // @match        *://*/*
 // @grant        none
@@ -10,44 +10,32 @@
 
 {
     const modalId = 'fujifruity-toc'
-    const getBgColor = e => {
-        const color = getComputedStyle(e).backgroundColor
-        return color.includes('rgb(') ? color : e.parentElement ? getBgColor(e.parentElement) : 'white'
-    }
     const createModal = () => {
-        const modal = document.createElement('div')
-        modal.id = modalId
-        modal.style.zIndex = 99999
-        modal.style.width = 'auto'
-        modal.style.maxHeight = '90%'
-        modal.style.position = 'fixed'
-        modal.style.padding = '1em'
-        modal.style.margin = '1em'
-        modal.style.overflowY = 'auto'
-        modal.style.cursor = 'pointer'
-        modal.style.boxShadow = '0 2px 10px rgba(0,0,0,0.16)'
-        modal.style.backgroundColor = getBgColor(document.body)
-        document.body.prepend(modal)
+        const modalHTML = `
+            <div id=${modalId} style="z-index:99999; width:auto; max-height:90%; position:fixed;
+                padding:1em; margin:1em; border-radius: 8px; overflow-y:auto; cursor:pointer;
+                box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; background-color:white" >
+            </div> `
+        document.body.innerHTML = modalHTML + document.body.innerHTML
+        const modal = document.getElementById(modalId)
         // Add headdings to the modal
         const headdings = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"))
-        const clonedHeaddings = headdings.map(e => e.cloneNode(true))
-        const clickableHeaddings = clonedHeaddings.map((e, i) => {
-            e.style.backgroundColor = getBgColor(headdings[i])
+        const clickableHeaddings = headdings.map((e, i) => {
+            e = e.cloneNode(true)
+            modal.appendChild(e)
+            e.style.color = 'black'
+            e.style.backgroundColor = 'white'
             e.addEventListener('click', event => headdings[i].scrollIntoView({ behavior: "smooth" }))
             return e
         })
-        clickableHeaddings.forEach(e => modal.appendChild(e))
         return modal
     }
     const getModal = () => document.getElementById(modalId) ?? createModal()
-    const closeModal = () => {
-        const modal = getModal()
-        modal.style.display = 'none'
-    }
+    const closeModal = () => { getModal().style.display = 'none' }
     window.addEventListener('keydown', event => {
-        if (!event.ctrlKey || !event.altKey || event.key != 't') return
-        const modal = getModal()
-        modal.style.display = 'block'
+        if (!event.altKey && !event.metaKey || !event.ctrlKey || event.key != 't') return
+        // Show modal
+        getModal().style.display = 'block'
         // Set shortcut to close modal
         const onKeydown = event => {
             if (event.key != 'Escape') return
