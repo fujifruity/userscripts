@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         NoMouseGoogle
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      1.11
-// @description  Shortcut for Google search results. j/k to move focus, l/h to open in new/background tab, n/p to go to next/previous page.
+// @version      1.12
+// @description  Shortcut for Google search results. j/k to move focus, enter/l/h to open in current/new/background tab, n/p to go to next/previous page.
 // @author       fujifruity
 // @include      https://www.google.com/search*
 // @include      https://www.google.co.*/search*
@@ -11,15 +11,13 @@
 // ==/UserScript==
 
 {
-    const items = [...document.querySelectorAll('#rso div[data-hveid][data-ved][lang], #rso video-voyager>div')]
-        .filter(e => e.offsetParent != null /* is visible */)
-    const open = inBackground => {
-        const url = findCurrentItem().querySelector('a').href
-        GM.openInTab(url, inBackground)
-    }
     const tag = "noMouseGoogleCurrentItem"
+    const items = [...document.querySelectorAll('#rso div[data-hveid][data-ved][lang], #rso video-voyager>div')]
     const findCurrentItem = () => items.find(e => e.hasAttribute(tag))
-
+    const currentItemHref = () => findCurrentItem().querySelector('a').href
+    const openInNewTab = inBackground => GM.openInTab(currentItemHref(), inBackground)
+    const openInThisTab = () => window.open(currentItemHref(), "_self")
+        .filter(e => e.offsetParent != null /* is visible */)
     const moveCursor = step => {
         const currentItem = findCurrentItem()
         const r = currentItem.getBoundingClientRect();
@@ -62,8 +60,9 @@
         if (event.target.tagName == "INPUT" || event.ctrlKey || event.altKey) return
         if (event.key == 'j') moveCursor(+1)
         if (event.key == 'k') moveCursor(-1)
-        if (event.key == 'l') open(false)
-        if (event.key == 'h') open(true)
+        if (event.key == 'l') openInNewTab(false)
+        if (event.key == 'h') openInNewTab(true)
+        if (event.key == 'Enter') openInThisTab()
         if (event.key == 'n') document.querySelector('#pnnext')?.click()
         if (event.key == 'p') document.querySelector('#pnprev')?.click()
     })
