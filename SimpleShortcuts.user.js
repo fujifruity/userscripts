@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SimpleShortcuts
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      2.1
+// @version      2.2
 // @description  Lets you create single-key shortcuts to click buttons. Press ctrl+alt+s to open manager.
 // @author       fujifruity
 // @match        *://*/*
@@ -29,6 +29,7 @@
                     event.ctrlKey || event.altKey || event.metaKey || event.key != k) return
                 // natural click
                 const button = elem(shortcuts[k])
+                button.focus()
                 console.log('clicking', button);
                 ["mousedown", "mouseup", "click"].forEach(eventType => {
                     const clickEvent = document.createEvent('MouseEvents');
@@ -59,7 +60,7 @@
             <div id=${modalId} style="z-index:99999; width:auto; max-height:90%; position:fixed;
                 padding:1em; margin:1em; border-radius: 8px; overflow-y:auto; cursor:pointer;
                 box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; background-color:white" >
-                <h1><b>SimpleShortcuts</b></h1><br>
+                <p><b>SimpleShortcuts</b></p>
                 <label for=urlInput>URL</label><br>
                 <input id=urlInput size=32><br><br>
                 <input id=keyInput size=3 placeholder=key maxlength=20>
