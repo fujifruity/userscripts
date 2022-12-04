@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Unfix
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      1.1
+// @version      1.2
 // @description  Unfixes all fixed elements such as navigation bar and keeps them unfixed. Keybind: ctrl+alt+u
 // @author       fujifruity
 // @match        *://*/*
@@ -38,8 +38,7 @@
 
     // Set keybinds
     window.addEventListener('keydown', event => {
-        if (event.key == 'u' && event.ctrlKey == true && event.altKey == true) {
-            unfixForever()
-        }
+        if (!event.altKey && !event.metaKey || !event.ctrlKey || event.key != 'u') return
+        unfixForever()
     })
 }
