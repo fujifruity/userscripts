@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SimpleShortcuts
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      2.3
+// @version      2.4
 // @description  Create single-key shortcuts for any page. Press ctrl+alt+s to open manager.
 // @author       fujifruity
 // @match        *://*/*
@@ -33,16 +33,11 @@
         Object.keys(shortcuts).forEach(k => {
             window.addEventListener('keydown', event => {
                 if (["INPUT", "TEXTAREA"].includes(event.target.tagName) ||
-                    event.ctrlKey || event.altKey || event.metaKey || event.key != k) return
-                // Natural click
+                 event.ctrlKey || event.altKey || event.metaKey || event.key != k) return
                 const button = elem(shortcuts[k])
                 button.focus()
+                button.click()
                 console.log('clicking', button);
-                ["mousedown", "mouseup", "click"].forEach(eventType => {
-                    const clickEvent = document.createEvent('MouseEvents');
-                    clickEvent.initEvent(eventType, true, true);
-                    button.dispatchEvent(clickEvent);
-                })
             })
         })
     }
@@ -113,7 +108,7 @@
         // Set event listeners to close modal
         const closeModal = modal => { modal.style.display = 'none' }
         const onKeydown = event => {
-            if (event.target.tagName == "INPUT" || event.key != 'Escape') return
+            if (["INPUT", "TEXTAREA"].includes(event.target.tagName) || event.key != 'Escape') return
             closeModal(modal)
             window.removeEventListener('keydown', onKeydown)
         }
