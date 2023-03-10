@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NoMouseGoogle
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      1.13
+// @version      1.14
 // @description  Shortcut for Google search results. j/k to move focus, enter/l/h to open in current/new/background tab, n/p to go to next/previous page.
 // @author       fujifruity
 // @include      https://www.google.com/search*
@@ -57,7 +57,7 @@
     highlight(items[0])
 
     window.addEventListener('keydown', event => {
-        if (event.target.tagName == "INPUT" || event.ctrlKey || event.altKey || event.metaKey) return
+        if (["INPUT", "TEXTAREA"].includes(event.target.tagName) || event.ctrlKey || event.altKey || event.metaKey) return
         if (event.key == 'j') moveCursor(+1)
         if (event.key == 'k') moveCursor(-1)
         if (event.key == 'l') openInNewTab(false)
