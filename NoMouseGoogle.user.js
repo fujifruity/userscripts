@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NoMouseGoogle
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      1.14
+// @version      1.15
 // @description  Shortcut for Google search results. j/k to move focus, enter/l/h to open in current/new/background tab, n/p to go to next/previous page.
 // @author       fujifruity
 // @include      https://www.google.com/search*
@@ -12,14 +12,12 @@
 
 {
     const tag = "noMouseGoogleCurrentItem"
-    const items = [...document.querySelectorAll('#rso div[data-hveid][data-ved][lang], #rso video-voyager>div')]
-    const findCurrentItem = () => items.find(e => e.hasAttribute(tag))
-    const currentItemHref = () => findCurrentItem().querySelector('a').href
-    const openInNewTab = inBackground => GM.openInTab(currentItemHref(), inBackground)
-    const openInThisTab = () => window.open(currentItemHref(), "_self")
+    const itemQuery = "#res div[data-hveid][data-ved][lang], #botstuff div[data-hveid][data-ved][lang], #rso video-voyager>div"
+    const findItems = () => [...document.querySelectorAll(itemQuery)]
         .filter(e => e.offsetParent != null /* is visible */)
     const moveCursor = step => {
-        const currentItem = findCurrentItem()
+        const items = findItems()
+        const currentItem = items.find(e => e.hasAttribute(tag))
         const r = currentItem.getBoundingClientRect();
         const inScreen = (0 < r.top && r.top < window.innerHeight
             || 0 < r.bottom && r.bottom < window.innerHeight)
@@ -29,19 +27,18 @@
                 return Math.abs(window.innerHeight - (r.top + r.bottom))
             }
             const nearestItem = items.reduce((acc, e) => dist(acc) < dist(e) ? acc : e)
-            select(nearestItem)
+            select(nearestItem, currentItem)
             return
         }
         const nextIdx = (items.indexOf(currentItem) + step + items.length) % items.length
-        select(items[nextIdx])
+        select(items[nextIdx], currentItem)
     }
     const highlight = e => {
         const isDarkTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         e.style.backgroundColor = isDarkTheme ? '#2a2a2a' : 'WhiteSmoke'
     }
-    const select = item => {
+    const select = (item, currentItem) => {
         // Deselect current item.
-        const currentItem = findCurrentItem()
         if (currentItem) {
             currentItem.style.backgroundColor = null
             currentItem.removeAttribute(tag)
@@ -50,7 +47,13 @@
         item.setAttribute(tag, '')
         highlight(item)
         item.scrollIntoView({ behavior: "smooth", block: "center" })
+        console.log('select', item)
     }
+
+    const items = findItems()
+    const currentItemHref = () => items.querySelector('a').href
+    const openInNewTab = inBackground => GM.openInTab(currentItemHref(), inBackground)
+    const openInThisTab = () => window.open(currentItemHref(), "_self")
 
     // Select the first item without scrolling.
     items[0].setAttribute(tag, '')
