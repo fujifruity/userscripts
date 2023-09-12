@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         NoMouseGoogle
 // @namespace    com.gmail.fujifruity.greasemonkey
-// @version      1.15
+// @version      1.16
 // @description  Shortcut for Google search results. j/k to move focus, enter/l/h to open in current/new/background tab, n/p to go to next/previous page.
 // @author       fujifruity
 // @include      https://www.google.com/search*
 // @include      https://www.google.co.*/search*
 // @grant        GM.openInTab
 // @license      MIT
+// @downloadURL none
 // ==/UserScript==
 
 {
@@ -15,9 +16,10 @@
     const itemQuery = "#res div[data-hveid][data-ved][lang], #botstuff div[data-hveid][data-ved][lang], #rso video-voyager>div"
     const findItems = () => [...document.querySelectorAll(itemQuery)]
         .filter(e => e.offsetParent != null /* is visible */)
+    const findCurrentItem = items => items.find(e => e.hasAttribute(tag))
     const moveCursor = step => {
         const items = findItems()
-        const currentItem = items.find(e => e.hasAttribute(tag))
+        const currentItem = findCurrentItem(items)
         const r = currentItem.getBoundingClientRect();
         const inScreen = (0 < r.top && r.top < window.innerHeight
             || 0 < r.bottom && r.bottom < window.innerHeight)
@@ -50,12 +52,12 @@
         console.log('select', item)
     }
 
-    const items = findItems()
-    const currentItemHref = () => items.querySelector('a').href
+    const currentItemHref = () => findCurrentItem(findItems()).querySelector('a').href
     const openInNewTab = inBackground => GM.openInTab(currentItemHref(), inBackground)
     const openInThisTab = () => window.open(currentItemHref(), "_self")
 
     // Select the first item without scrolling.
+    const items = findItems()
     items[0].setAttribute(tag, '')
     highlight(items[0])
 
